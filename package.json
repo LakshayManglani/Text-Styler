@@ -1,0 +1,16 @@
+{
+  "name": "text-styler",
+  "version": "1.0.0",
+  "description": "Effortlessly customize text and receive the corresponding CSS, giving you total control over your personalized typography.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Lakshay Manglani",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-standard": "^17.1.0"
+  }
+}

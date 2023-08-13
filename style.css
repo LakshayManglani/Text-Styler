@@ -1,0 +1,23 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.rangeContainer {
+  margin: 10px;
+  width: 200px;
+}
+
+.rangeLabel {
+  display: block;
+}
+
+.rangeSlider {
+  width: 70%;
+}
+
+.rangeNumber {
+  width: 20%;
+  margin-left: 10px;
+}
