@@ -21,3 +21,21 @@
   width: 20%;
   margin-left: 10px;
 }
+
+.colorContainer {
+  margin: 10px;
+  width: 200px;
+}
+
+.colorLabel {
+  display: block;
+}
+
+.colorPicker {
+  width: 30%;
+}
+
+.colorText {
+  width: 60%;
+  margin-left: 10px;
+}

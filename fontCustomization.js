@@ -79,6 +79,14 @@ function createRangeSlider(
   });
   labelElement.innerText = label;
 
+  if (defaultValue != null) {
+    if (defaultValue > maxValue) {
+      defaultValue = maxValue;
+    } else if (defaultValue < minValue) {
+      defaultValue = minValue;
+    }
+  }
+
   const rangeSlider = createElementWithAttributes('input', {
     type: 'range',
     name: `${name}RangeSlider`,
@@ -86,7 +94,7 @@ function createRangeSlider(
     class: `rangeSlider`,
     min: minValue,
     max: maxValue,
-    value: defaultValue != null ? defaultValue : (max + min) / 2,
+    value: defaultValue != null ? defaultValue : (maxValue + minValue) / 2,
   });
 
   const rangeNumberInput = createElementWithAttributes('input', {
@@ -96,7 +104,7 @@ function createRangeSlider(
     class: `rangeNumber`,
     min: minValue,
     max: maxValue,
-    value: defaultValue != null ? defaultValue : (max + min) / 2,
+    value: defaultValue != null ? defaultValue : (maxValue + minValue) / 2,
   });
 
   // Update the range number input value when the range slider changes
@@ -107,14 +115,14 @@ function createRangeSlider(
 
   // Update the range slider value when the range number input changes
   function updateRangeSliderValue() {
-    if (rangeNumberInput.value > max) {
-      rangeNumberInput.value = max;
-    } else if (rangeNumberInput.value < min) {
-      rangeNumberInput.value = min;
+    if (rangeNumberInput.value > maxValue) {
+      rangeNumberInput.value = maxValue;
+    } else if (rangeNumberInput.value < minValue) {
+      rangeNumberInput.value = minValue;
     }
     rangeSlider.value = rangeNumberInput.value;
   }
-  rangeNumberInput.addEventListener('change', updateRangeSliderValue);
+  rangeNumberInput.addEventListener('change', () => updateRangeSliderValue());
 
   // Append elements to the range container and then to the specified parent
   appendChilds(rangeContainer, [
@@ -134,6 +142,42 @@ function createRangeSlider(
   return rangeSliderObjects;
 }
 
+// function to create slider and attach it to given element
+// with changable properties
+function createAndAttachSlider(
+    attachTo,
+    propertie,
+    label,
+    name,
+    minValue,
+    maxValue,
+    defaultValue) {
+  const element = createRangeSlider(
+      label,
+      name,
+      minValue,
+      maxValue,
+      defaultValue,
+  );
+
+  // set default value first
+  if (defaultValue > maxValue) {
+    defaultValue = maxValue;
+  } else if (defaultValue < minValue) {
+    defaultValue = minValue;
+  }
+  attachTo.style[propertie] = `${defaultValue}px`;
+
+  function updateStyle(event) {
+    attachTo.style[propertie] = `${event.target.value}px`;
+  }
+
+  element.rangeSlider.addEventListener('input', updateStyle);
+  element.rangeNumberInput.addEventListener('change', updateStyle);
+
+  return element;
+}
+
 // * Create and append a paragraph element
 const paragraph = createElementWithProperties('p', {
   innerText: 'Every evil has a price.',
@@ -141,28 +185,105 @@ const paragraph = createElementWithProperties('p', {
 document.body.appendChild(paragraph);
 
 // * Create Sliders to customize font
-
 // Font Size Slider
-const fontSizeRangeSlider = createRangeSlider(
-    'Size: ', 'fontSize', 5, 30, 16,
-);
-fontSizeRangeSlider.rangeSlider.addEventListener('input', (event) => {
-  paragraph.style.fontSize = `${event.target.value}px`;
-});
+createAndAttachSlider(
+    paragraph, 'fontSize', 'Size: ', 'fontSize', 5, 30, 16);
 
 // Letter Spacing Slider
-const letterSpacingRangeSlider = createRangeSlider(
-    'Letter Spacing: ', 'letterSpacing', -5, 6, 0,
-);
-letterSpacingRangeSlider.rangeSlider.addEventListener('input', (event) => {
-  paragraph.style.letterSpacing = `${event.target.value}px`;
-});
+createAndAttachSlider(
+    paragraph, 'letterSpacing', 'Letter Spacing: ', 'letterSpacing', -5, 6, 0);
 
 // Word Spacing Slider
-const wordSpacingRangeSlider = createRangeSlider(
-    'Word Spacing: ', 'wordSpacing', -5, 6, 0,
-);
-wordSpacingRangeSlider.rangeSlider.addEventListener('input', (event) => {
-  paragraph.style.wordSpacing = `${event.target.value}px`;
-});
+createAndAttachSlider(
+    paragraph, 'wordSpacing', 'Word Spacing: ', 'wordSpacing', -5, 6, 0);
 
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
+// ============================================================================
+// ============================================================================
+
+
+/**
+ * Utility function to create a color picker with associated elements.
+ *
+ * @param {string} label - The label for the color picker.
+ * @param {string} name - The unique name for the color picker.
+ * @param {string} defaultValue - The default hex value for the color.
+ * @param {HTMLElement} [appendTo=document.body] - The parent element to append
+ * the color picker to.
+ * @return {Object} An object containing references to the created elements.
+ */
+function createColorPicker(
+    label,
+    name,
+    defaultValue = '#000000',
+    appendTo = document.body,
+) {
+  const colorContainer = createElementWithAttributes('div', {
+    id: `${name}ColorContainer`,
+    class: 'colorContainer',
+  });
+
+  const colorLabel = createElementWithAttributes('label', {
+    for: `${name}ColorPicker`,
+    class: 'colorLabel',
+  });
+  colorLabel.innerText = label;
+
+  const colorPicker = createElementWithAttributes('input', {
+    type: 'color',
+    name: `${name}ColorPicker`,
+    id: `${name}ColorPicker`,
+    class: 'colorPicker',
+    value: defaultValue,
+  });
+
+  const colorText = createElementWithAttributes('input', {
+    type: 'text',
+    name: `${name}ColorText`,
+    id: `${name}ColorText`,
+    class: 'colorText',
+    value: defaultValue,
+  });
+
+  // Update the color text input value when the color picker changes
+  function updateColorTextValue() {
+    colorText.value = colorPicker.value;
+  }
+  colorPicker.addEventListener('input', updateColorTextValue);
+
+  // Update the color picker value when the color text input changes
+  function updateColorPickerValue() {
+    colorPicker.value = colorText.value;
+  }
+  colorText.addEventListener('change', updateColorPickerValue);
+
+  appendChilds(colorContainer, [colorLabel, colorPicker, colorText]);
+  appendTo.appendChild(colorContainer);
+
+  const colorPickerObject = {
+    colorContainer,
+    colorLabel,
+    colorPicker,
+    colorText,
+  };
+
+  return colorPickerObject;
+}
+
+// Create Color Picker for customizing font color
+const colorDefaultValue = '#ff00ff';
+const fontColor = createColorPicker(
+    'Font Color: ',
+    'fontColor',
+    colorDefaultValue,
+);
+paragraph.style.color = colorDefaultValue;
+fontColor.colorPicker.addEventListener('change', (event) => {
+  paragraph.style.color = `${event.target.value}`;
+});
+fontColor.colorText.addEventListener('change', (event) => {
+  paragraph.style.color = `${fontColor.colorPicker.value}`;
+});
