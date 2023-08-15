@@ -47,6 +47,76 @@ function createElementWithProperties(tagName, properties) {
   return element;
 }
 
+// * Create and append a paragraph element
+const paragraph = createElementWithProperties('p', {
+  innerText: 'Every evil has a price. Units are in px.',
+});
+paragraph.setAttribute('class', 'paragraph');
+document.body.appendChild(paragraph);
+
+// * Create text area for css
+const textAreaForCss = createElementWithAttributes('textarea', {
+  class: 'textareaForCss',
+  readonly: '',
+});
+function updateTextArea() {
+  textAreaForCss.innerText = paragraph.getAttribute('style');
+}
+
+function createSelectWithOption(
+    label,
+    name,
+    values,
+    defaultValue,
+    appendTo = document.body,
+) {
+  // Creating HTML elements
+  const selectContainer = createElementWithAttributes('div', {
+    id: `${name}SelectContainer`,
+    class: 'selectContainer',
+  });
+
+  const selectLabel = createElementWithAttributes('label', {
+    class: 'selectLabel',
+  });
+  selectLabel.innerText = label;
+
+  const select = createElementWithAttributes('select', {
+    name: `${name}Select`,
+    id: `${name}Select`,
+    class: 'select',
+  });
+
+  select.addEventListener('change', (event) => {
+    paragraph.style[name] = event.target.value;
+    updateTextArea();
+  });
+
+  for (const value of values) {
+    const option = createElementWithAttributes('option', {
+      value,
+      class: 'option',
+    });
+    if (defaultValue === value) {
+      paragraph.style[name] = value;
+    }
+    option.innerText = value;
+    select.appendChild(option);
+  }
+
+  appendChilds(selectContainer, [
+    selectLabel, select,
+  ]);
+  appendTo.appendChild(selectContainer);
+}
+
+createSelectWithOption('Font Family: ', 'fontFamily', [
+  'Cambria',
+  'Arial',
+  'monospace',
+], 'Cambria');
+
+
 /**
  **Utility function to create a range slider with associated elements.
  *
@@ -110,6 +180,7 @@ function createRangeSlider(
   // Update the range number input value when the range slider changes
   function updateRangeNumberValue() {
     rangeNumberInput.value = rangeSlider.value;
+    updateTextArea();
   }
   rangeSlider.addEventListener('input', updateRangeNumberValue);
 
@@ -121,6 +192,7 @@ function createRangeSlider(
       rangeNumberInput.value = minValue;
     }
     rangeSlider.value = rangeNumberInput.value;
+    updateTextArea();
   }
   rangeNumberInput.addEventListener('change', () => updateRangeSliderValue());
 
@@ -170,6 +242,7 @@ function createAndAttachSlider(
 
   function updateStyle(event) {
     attachTo.style[propertie] = `${event.target.value}px`;
+    updateTextArea();
   }
 
   element.rangeSlider.addEventListener('input', updateStyle);
@@ -177,12 +250,6 @@ function createAndAttachSlider(
 
   return element;
 }
-
-// * Create and append a paragraph element
-const paragraph = createElementWithProperties('p', {
-  innerText: 'Every evil has a price.',
-});
-document.body.appendChild(paragraph);
 
 // * Create Sliders to customize font
 // Font Size Slider
@@ -252,7 +319,7 @@ function createColorPicker(
   function updateColorTextValue() {
     colorText.value = colorPicker.value;
   }
-  colorPicker.addEventListener('input', updateColorTextValue);
+  colorPicker.addEventListener('change', updateColorTextValue);
 
   // Update the color picker value when the color text input changes
   function updateColorPickerValue() {
@@ -283,7 +350,126 @@ const fontColor = createColorPicker(
 paragraph.style.color = colorDefaultValue;
 fontColor.colorPicker.addEventListener('change', (event) => {
   paragraph.style.color = `${event.target.value}`;
+  updateTextArea();
 });
 fontColor.colorText.addEventListener('change', (event) => {
   paragraph.style.color = `${fontColor.colorPicker.value}`;
+  updateTextArea();
 });
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
+// ============================================================================
+// ============================================================================
+
+function createRadioLabelAndInput(name, defaultValue, values) {
+  const elements = [];
+  for (const value of values) {
+    const radioLabel = createElementWithAttributes('label', {
+      for: `${value}RadioInput`,
+      class: 'radioLabel',
+    });
+    const radioInput = createElementWithAttributes('input', {
+      type: 'radio',
+      name: `${name}RadioInput`,
+      id: `${value}RadioInput`,
+      class: 'radioInput',
+      value: value,
+    });
+    if (defaultValue === value) {
+      radioInput.checked = true;
+      paragraph.style[name] = value;
+      radioLabel.style.color = 'red';
+    }
+    radioInput.addEventListener('change', () => {
+      if (radioInput.checked) {
+        for (const element of elements) {
+          element.style.color = 'black';
+        }
+        paragraph.style[name] = radioInput.value;
+        radioInput.parentElement.style.color = 'red';
+        updateTextArea();
+      }
+    });
+
+    radioLabel.innerText = value;
+    radioLabel.appendChild(radioInput);
+    elements.push(radioLabel);
+  }
+  return elements;
+}
+
+function createRadioCheckBox(
+    categoryName,
+    name,
+    values,
+    defaultValue,
+    appendTo = document.body,
+) {
+  // Creating HTML elements
+  const radioContainer = createElementWithAttributes('div', {
+    id: `${name}RadioContainer`,
+    class: 'radioContainer',
+  });
+
+  const radioCategorySpan = createElementWithAttributes('span', {
+    class: 'radioCategorySpan',
+  });
+  radioCategorySpan.innerText = categoryName;
+
+  const labelsAndRadioInput = createRadioLabelAndInput(
+      name,
+      defaultValue,
+      values,
+  );
+
+  appendChilds(radioContainer, [
+    radioCategorySpan, ...labelsAndRadioInput,
+  ]);
+  appendTo.appendChild(radioContainer);
+
+  return labelsAndRadioInput;
+}
+
+createRadioCheckBox(
+    'Style: ',
+    'fontStyle',
+    ['normal', 'italic'],
+    'normal',
+);
+
+createRadioCheckBox(
+    'Weigth: ',
+    'fontWeight',
+    ['normal', 'bold'],
+    'normal',
+);
+
+createRadioCheckBox(
+    'Font Variant: ',
+    'fontVariant',
+    ['normal', 'small-caps'],
+    'normal',
+);
+
+createRadioCheckBox(
+    'Text Decoration: ',
+    'textDecoration',
+    ['none', 'line-through', 'overline', 'underline'],
+    'none',
+);
+
+paragraph.style.textDecoration = 'dashed';
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
+// ============================================================================
+// ============================================================================
+
+updateTextArea();
+document.body.appendChild(createElementWithProperties('h1', {
+  innerText: 'Generated CSS : ',
+}));
+document.body.appendChild(textAreaForCss);
